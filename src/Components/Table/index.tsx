@@ -13,7 +13,7 @@ const TableContainer = styled.table`
 `;
 
 const TdContainer = styled.td`
-  padding: 18px 20px 18px;
+  padding: 3px 15px 3px;
   text-align: left;
   background: -webkit-gradient(
     linear,
@@ -24,73 +24,90 @@ const TdContainer = styled.td`
   );
 `;
 
+const Hightlight = styled.span`
+  background: red;
+`;
+
 const BodyCell: FC = ({ children }) => <TdContainer>{children}</TdContainer>;
 
 export const Table: FC = () => {
   const [barcodes, setBarcodes] = useState(['']);
   const [filteredBarcodes, setFilteredBarcodes] = useState(['']);
-  const [eventValue, setEventValue] = useState('');
+  const [eventState, setEventState] = useState('');
 
-  async function getBarcodes(e: any) {
-    if (e.keyCode === 13) {
-      console.log('getBarcodes');
+  async function getBarcodes() {
+    console.log('getBarcodes');
 
-      try {
-        const response = await fetch('http://qvz87.mocklab.io/barcodes/');
-        const json = await response.json();
-        setBarcodes(json);
-      } catch (err) {
-        console.error(err);
-      }
+    try {
+      const response = await fetch('http://qvz87.mocklab.io/barcodes/');
+      const json = await response.json();
+      setBarcodes(json);
+    } catch (err) {
+      console.error(err);
     }
   }
 
-  function filteringTable(arg: any) {
-    const filteredData = [];
-    for (let item of barcodes) {
-      if (item.indexOf(arg) !== -1) {
-        filteredData.push(item);
+  function filteringTable(e: any) {
+    console.log(Boolean(e.target.value));
+    if (e.keyCode === 13 && e.target.value) {
+      setEventState(e.target.value);
+      const filteredData = [];
+      for (let item of barcodes) {
+        if (item.indexOf(e.target.value) !== -1) {
+          filteredData.push(item);
+        }
       }
+      setFilteredBarcodes(filteredData);
+      console.log('filteringTable');
     }
-    console.log('filteringTable');
-    return filteredData;
+    return null;
   }
 
-  useEffect(
-    (...eventValue) => {
-      if (barcodes.length > 0) {
-        console.log('useEffect2');
-        const newState: any = filteringTable(eventValue);
-        setFilteredBarcodes(newState);
-      }
-    },
-    [barcodes]
-  );
+  const Hightlighter = (item: string) => {
+    if (!eventState) return item;
+    const regexp = new RegExp(eventState, 'i');
+    const matchValue = item.match(regexp);
+
+    if (matchValue) {
+      console.log('matchValue', matchValue);
+      console.log('str.split(regexp)', item.split(regexp));
+
+      return item.split(regexp).map((s: string, i: number, array: any) => {
+        if (i < array.length - 1) {
+          const c = matchValue.shift();
+          return (
+            <span key={`span-hightight-${i}`}>
+              {s}
+              <Hightlight>{c}</Hightlight>
+            </span>
+          );
+        }
+        return s;
+      });
+    }
+    return item;
+  };
 
   useEffect(() => {
-    window.addEventListener('keydown', getBarcodes);
-
-    return () => {
-      console.log('remove');
-      window.removeEventListener('keydown', getBarcodes);
-    };
-  });
+    getBarcodes();
+  }, []);
 
   return (
     <div>
       <div>
-        <legend>Штрихкод</legend>
+        <pre>Штрихкод</pre>
         <input
           type="text"
           id="one"
-          onKeyDown={(e: any) => setEventValue(e.target.value)}
+          onKeyDown={(e: any) => filteringTable(e)}
+          placeholder="Search"
         />
       </div>
       <TableContainer>
         <tbody>
           {filteredBarcodes.map((item, i) => (
-            <tr key={`user-info-tr${i}`}>
-              <BodyCell>{item}</BodyCell>
+            <tr key={`barcode-tr${i}`}>
+              <BodyCell>{Hightlighter(item)}</BodyCell>
             </tr>
           ))}
         </tbody>
