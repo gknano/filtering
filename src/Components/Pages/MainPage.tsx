@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { PageContainer } from '../PageContainer';
-import { Table } from '../Table/index';
+import { Table } from '../Table';
 
 export const MainPage: FC = () => {
   return (
