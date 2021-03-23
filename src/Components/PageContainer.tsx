@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import styled from '@emotion/styled';
-import { PageContainerProps } from './types/index';
+import { TPageContainerProps } from './types/index';
 
 const StyledPage = styled.div`
   display: grid;
@@ -10,7 +10,7 @@ const StyledPage = styled.div`
 `;
 
 // создаем универсальный контейнер для страниц
-export const PageContainer: FC<PageContainerProps> = ({
+export const PageContainer: FC<TPageContainerProps> = ({
   children,
   className,
   style,

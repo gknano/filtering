@@ -1,5 +1,6 @@
 import React, { FC, useState, useEffect } from 'react';
 import styled from '@emotion/styled';
+import { Hightlighter } from '../utils/HightLighter';
 
 const TableContainer = styled.table`
   overflow: hidden;
@@ -24,22 +25,18 @@ const TdContainer = styled.td`
   );
 `;
 
-const Hightlight = styled.span`
-  background: red;
-`;
-
 const BodyCell: FC = ({ children }) => <TdContainer>{children}</TdContainer>;
 
 export const Table: FC = () => {
-  const [barcodes, setBarcodes] = useState(['']);
-  const [filteredBarcodes, setFilteredBarcodes] = useState(['']);
+  const [barcodes, setBarcodes] = useState<string[]>([]);
+  const [filteredBarcodes, setFilteredBarcodes] = useState<string[]>([]);
   const [eventState, setEventState] = useState('');
 
   async function getBarcodes() {
     console.log('getBarcodes');
 
     try {
-      const response = await fetch('http://qvz87.mocklab.io/barcodes/');
+      const response = await fetch('http://qvz87.mocklab.io/barcodes1000/');
       const json = await response.json();
       setBarcodes(json);
     } catch (err) {
@@ -48,45 +45,19 @@ export const Table: FC = () => {
   }
 
   function filteringTable(e: any) {
-    console.log(Boolean(e.target.value));
-    if (e.keyCode === 13 && e.target.value) {
+    if (e.keyCode === 13) {
       setEventState(e.target.value);
-      const filteredData = [];
+      const filteredData = [] as any;
+      console.log('filteringTable');
       for (let item of barcodes) {
         if (item.indexOf(e.target.value) !== -1) {
           filteredData.push(item);
         }
       }
       setFilteredBarcodes(filteredData);
-      console.log('filteringTable');
     }
     return null;
   }
-
-  const Hightlighter = (item: string) => {
-    if (!eventState) return item;
-    const regexp = new RegExp(eventState, 'i');
-    const matchValue = item.match(regexp);
-
-    if (matchValue) {
-      console.log('matchValue', matchValue);
-      console.log('str.split(regexp)', item.split(regexp));
-
-      return item.split(regexp).map((s: string, i: number, array: any) => {
-        if (i < array.length - 1) {
-          const c = matchValue.shift();
-          return (
-            <span key={`span-hightight-${i}`}>
-              {s}
-              <Hightlight>{c}</Hightlight>
-            </span>
-          );
-        }
-        return s;
-      });
-    }
-    return item;
-  };
 
   useEffect(() => {
     getBarcodes();
@@ -94,11 +65,12 @@ export const Table: FC = () => {
 
   return (
     <div>
-      <div>
-        <pre>Штрихкод</pre>
+      <div className="form-group">
+        <label>Штрихкод</label>
         <input
           type="text"
           id="one"
+          className="form-control"
           onKeyDown={(e: any) => filteringTable(e)}
           placeholder="Search"
         />
@@ -107,7 +79,9 @@ export const Table: FC = () => {
         <tbody>
           {filteredBarcodes.map((item, i) => (
             <tr key={`barcode-tr${i}`}>
-              <BodyCell>{Hightlighter(item)}</BodyCell>
+              <BodyCell>
+                <Hightlighter item={item} eventState={eventState} i={i} />
+              </BodyCell>
             </tr>
           ))}
         </tbody>
