@@ -1,15 +1,7 @@
-export type TPageContainerProps = {
-  children?: React.ReactNode;
-  className?: string;
-  style?: any;
-};
-
 export type THightlighter = {
-  item: string | any;
-  eventState: string;
+  item: string;
+  coloredValue: string;
   i: number;
 };
 
-// export interface TableData {
-//   item: any;
-// }
+export type DivType = React.HTMLAttributes<HTMLDivElement>;
