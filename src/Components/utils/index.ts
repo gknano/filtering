@@ -1,0 +1,1 @@
+export { getFilteredData } from './getFilteredData';
