@@ -19,7 +19,6 @@ const BodyCell: FC = ({ children }) => <TdContainer>{children}</TdContainer>;
 type BodyProps = { barcodes: string[]; coloredValue: string };
 
 export const Body: FC<BodyProps> = ({ barcodes, coloredValue }) => {
-  //debugger;
   return (
     <tbody>
       {barcodes.map((item, i) => (
