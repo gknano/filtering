@@ -1,6 +1,8 @@
 import React, { FC, useState, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { Hightlighter } from '../utils/HightLighter';
+import { getFilteredData } from '../utils';
+import { getBarcodes } from '../../api';
+import { Body } from './body';
 
 const TableContainer = styled.table`
   overflow: hidden;
@@ -13,78 +15,42 @@ const TableContainer = styled.table`
   -webkit-box-shadow: 0 0 4px rgb(0 0 0 / 20%);
 `;
 
-const TdContainer = styled.td`
-  padding: 3px 15px 3px;
-  text-align: left;
-  background: -webkit-gradient(
-    linear,
-    0% 0%,
-    0% 25%,
-    from(#f9f9f9),
-    to(#fefefe)
-  );
-`;
-
-const BodyCell: FC = ({ children }) => <TdContainer>{children}</TdContainer>;
-
 export const Table: FC = () => {
   const [barcodes, setBarcodes] = useState<string[]>([]);
   const [filteredBarcodes, setFilteredBarcodes] = useState<string[]>([]);
-  const [eventState, setEventState] = useState('');
+  const [eventValue, setEventValue] = useState('');
 
-  async function getBarcodes() {
-    console.log('getBarcodes');
-
-    try {
-      const response = await fetch('http://qvz87.mocklab.io/barcodes1000/');
-      const json = await response.json();
-      setBarcodes(json);
-    } catch (err) {
-      console.error(err);
+  const filteringTable = ({
+    key,
+    currentTarget,
+  }: React.KeyboardEvent<HTMLInputElement>) => {
+    const { value } = currentTarget;
+    if (key === 'Enter' && value) {
+      setEventValue(value);
+      setFilteredBarcodes(getFilteredData(barcodes, value));
     }
-  }
-
-  function filteringTable(e: any) {
-    if (e.keyCode === 13) {
-      setEventState(e.target.value);
-      const filteredData = [] as any;
-      console.log('filteringTable');
-      for (let item of barcodes) {
-        if (item.indexOf(e.target.value) !== -1) {
-          filteredData.push(item);
-        }
-      }
-      setFilteredBarcodes(filteredData);
-    }
-    return null;
-  }
+  };
 
   useEffect(() => {
-    getBarcodes();
+    getBarcodes<string[]>().then((data) => setBarcodes(data));
   }, []);
 
   return (
     <div>
       <div className="form-group">
-        <label>Штрихкод</label>
+        <h4>Штрихкод</h4>
         <input
           type="text"
           id="one"
           className="form-control"
-          onKeyDown={(e: any) => filteringTable(e)}
+          onKeyDown={(e) => filteringTable(e)}
           placeholder="Search"
         />
       </div>
       <TableContainer>
-        <tbody>
-          {filteredBarcodes.map((item, i) => (
-            <tr key={`barcode-tr${i}`}>
-              <BodyCell>
-                <Hightlighter item={item} eventState={eventState} i={i} />
-              </BodyCell>
-            </tr>
-          ))}
-        </tbody>
+        {filteredBarcodes && (
+          <Body barcodes={filteredBarcodes} coloredValue={eventValue} />
+        )}
       </TableContainer>
     </div>
   );
