@@ -1,19 +1,8 @@
 import React, { FC, useState, useEffect } from 'react';
-import styled from '@emotion/styled';
 import { getFilteredData } from '../utils';
 import { getBarcodes } from '../../api';
-import { Body } from './body';
-
-const TableContainer = styled.table`
-  overflow: hidden;
-  border: 1px solid #d3d3d3;
-  background: #fefefe;
-  width: 100%;
-  margin: 5% auto 0;
-  border-radius: 5px;
-  -moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-  -webkit-box-shadow: 0 0 4px rgb(0 0 0 / 20%);
-`;
+import { TableComponent } from './table';
+import { Spinner } from '../Spinner/Spinner';
 
 export const Table: FC = () => {
   const [barcodes, setBarcodes] = useState<string[]>([]);
@@ -21,11 +10,10 @@ export const Table: FC = () => {
   const [eventValue, setEventValue] = useState('');
 
   const filteringTable = ({
-    key,
     currentTarget,
-  }: React.KeyboardEvent<HTMLInputElement>) => {
+  }: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = currentTarget;
-    if (key === 'Enter' && value) {
+    if (value) {
       setEventValue(value);
       setFilteredBarcodes(getFilteredData(barcodes, value));
     }
@@ -37,21 +25,25 @@ export const Table: FC = () => {
 
   return (
     <div>
-      <div className="form-group">
+      <div>
         <h4>Штрихкод</h4>
         <input
           type="text"
           id="one"
           className="form-control"
-          onKeyDown={(e) => filteringTable(e)}
+          onChange={filteringTable}
           placeholder="Search"
         />
       </div>
-      <TableContainer>
-        {filteredBarcodes && (
-          <Body barcodes={filteredBarcodes} coloredValue={eventValue} />
-        )}
-      </TableContainer>
+      {!filteredBarcodes.length && eventValue ? (
+        <Spinner />
+      ) : (
+        <TableComponent
+          isShow={!!filteredBarcodes.length}
+          barcodes={filteredBarcodes}
+          eventValue={eventValue}
+        />
+      )}
     </div>
   );
 };
