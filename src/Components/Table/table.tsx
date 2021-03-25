@@ -21,7 +21,7 @@ const TableContainer: FC<TableType> = ({
 
 export const TableComponent = styled(TableContainer)`
   display: ${({ isShow }) => (isShow ? 'block' : 'none')};
-  height: 40em;
+  max-height: 40em;
   overflow-y: scroll;
   border: 1px solid #d3d3d3;
   background: #fefefe;
