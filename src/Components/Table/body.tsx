@@ -1,33 +1,49 @@
-import React, { FC } from 'react';
-import styled from '@emotion/styled';
-import { Hightlighter } from '../HightLighter';
+import React, { FC, useState, useEffect } from 'react';
+import { getFilteredData } from '../utils';
+import { getBarcodes } from '../../api';
+import { TableComponent } from './table';
+import { Spinner } from '../Spinner';
 
-const TdContainer = styled.td`
-  padding: 3px 15px 3px;
-  text-align: left;
-  background: -webkit-gradient(
-    linear,
-    0% 0%,
-    0% 25%,
-    from(#f9f9f9),
-    to(#fefefe)
-  );
-`;
+export const Table: FC = () => {
+  const [barcodes, setBarcodes] = useState<string[]>([]);
+  const [filteredBarcodes, setFilteredBarcodes] = useState<string[]>([]);
+  const [eventValue, setEventValue] = useState('');
 
-const BodyCell: FC = ({ children }) => <TdContainer>{children}</TdContainer>;
+  const filteringTable = ({
+    currentTarget,
+  }: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = currentTarget;
+    if (value) {
+      setEventValue(value);
+      setFilteredBarcodes(getFilteredData(barcodes, value));
+    }
+  };
 
-type BodyProps = { barcodes: string[]; coloredValue: string };
+  useEffect(() => {
+    getBarcodes<string[]>().then((data) => setBarcodes(data));
+  }, []);
 
-export const Body: FC<BodyProps> = ({ barcodes, coloredValue }) => {
   return (
-    <tbody>
-      {barcodes.map((item, i) => (
-        <tr key={`barcode-tr${i}`}>
-          <BodyCell>
-            <Hightlighter item={item} coloredValue={coloredValue} i={i} />
-          </BodyCell>
-        </tr>
-      ))}
-    </tbody>
+    <div>
+      <div>
+        <h4>Штрихкод</h4>
+        <input
+          type="text"
+          id="one"
+          className="form-control"
+          onChange={filteringTable}
+          placeholder="Search"
+        />
+      </div>
+      {!filteredBarcodes.length && eventValue ? (
+        <Spinner />
+      ) : (
+        <TableComponent
+          isShow={!!filteredBarcodes.length}
+          barcodes={filteredBarcodes}
+          eventValue={eventValue}
+        />
+      )}
+    </div>
   );
 };
